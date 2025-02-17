@@ -1,6 +1,4 @@
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Scanner;
+import java.util.*;
 
 public class Baekjoon1260 {
     static ArrayList<Integer>[] graph;
@@ -35,7 +33,8 @@ public class Baekjoon1260 {
 
         sc.close();
 
-        dfs(V);
+        //    dfs(V);
+        bfs(V);
 
     }
 
@@ -48,5 +47,26 @@ public class Baekjoon1260 {
                 dfs(next);
             }
         }
+    }
+
+    static void bfs(int start) {
+        Queue<Integer> q = new LinkedList<>();
+
+        q.offer(start);
+
+        visited[start] = true;
+
+        while (!q.isEmpty()) {
+            int x = q.poll();
+            System.out.print(x + " ");
+            for (int next : graph[x]) {
+                if (!visited[next]) {
+                    q.offer(next);
+                    visited[next] = true;
+                }
+            }
+        }
+
+
     }
 }
