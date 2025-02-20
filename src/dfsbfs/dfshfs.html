@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DFS와 BFS 시각화</title>
+    <style>
+        body {
+            font-family: 'Nanum Gothic', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+            text-align: center;
+        }
+        .algo-container {
+            display: flex;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .graph-container {
+            flex: 1;
+            min-width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px;
+            position: relative;
+        }
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .node {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            background-color: #fff;
+            border: 2px solid #333;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .edge {
+            position: absolute;
+            background-color: #666;
+            height: 2px;
+            transform-origin: 0 0;
+        }
+        .queue-stack {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        .explanation {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f0f8ff;
+            border-radius: 4px;
+        }
+        .visited {
+            background-color: #4CAF50 !important;
+            color: white;
+        }
+        .current {
+            background-color: #ff9800 !important;
+            color: white;
+            transform: scale(1.2);
+            box-shadow: 0 0 10px rgba(255, 152, 0, 0.7);
+        }
+        .processing {
+            background-color: #2196F3 !important;
+            color: white;
+        }
+        .step-display {
+            font-size: 18px;
+            text-align: center;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .data-structure {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .data-item {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #e9e9e9;
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 0 10px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            border: 1px solid #333;
+        }
+        .section-title {
+            margin-top: 30px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>DFS와 BFS 단계별 시각화</h1>
+
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #fff;"></div>
+            <span>미방문 노드</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #4CAF50;"></div>
+            <span>방문 완료</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #ff9800;"></div>
+            <span>현재 노드</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #2196F3;"></div>
+            <span>처리 중</span>
+        </div>
+    </div>
+
+    <h2 class="section-title">깊이 우선 탐색 (DFS)</h2>
+    <p>DFS는 스택을 사용하여 가능한 한 깊이 탐색한 후 다시 돌아가서 탐색을 계속합니다.</p>
+
+    <div class="controls">
+        <button id="dfs-prev" disabled>이전 단계</button>
+        <button id="dfs-next">다음 단계</button>
+        <button id="dfs-reset">처음부터</button>
+    </div>
+    <div class="step-display" id="dfs-step">단계: 0/0</div>
+
+    <div class="algo-container">
+        <div class="graph-container" id="dfs-graph"></div>
+        <div class="graph-container">
+            <h3>스택</h3>
+            <div class="data-structure" id="dfs-stack"></div>
+            <h3>방문 순서</h3>
+            <div class="data-structure" id="dfs-visited"></div>
+            <div class="explanation" id="dfs-explanation">
+                DFS를 시작하려면 '다음 단계' 버튼을 클릭하세요.
+            </div>
+        </div>
+    </div>
+
+    <h2 class="section-title">너비 우선 탐색 (BFS)</h2>
+    <p>BFS는 큐를 사용하여 현재 깊이의 모든 노드를 탐색한 후 다음 깊이로 진행합니다.</p>
+
+    <div class="controls">
+        <button id="bfs-prev" disabled>이전 단계</button>
+        <button id="bfs-next">다음 단계</button>
+        <button id="bfs-reset">처음부터</button>
+    </div>
+    <div class="step-display" id="bfs-step">단계: 0/0</div>
+
+    <div class="algo-container">
+        <div class="graph-container" id="bfs-graph"></div>
+        <div class="graph-container">
+            <h3>큐</h3>
+            <div class="data-structure" id="bfs-queue"></div>
+            <h3>방문 순서</h3>
+            <div class="data-structure" id="bfs-visited"></div>
+            <div class="explanation" id="bfs-explanation">
+                BFS를 시작하려면 '다음 단계' 버튼을 클릭하세요.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 그래프 정의
+    const graph = {
+        A: ['B', 'C', 'D'],
+        B: ['A', 'E', 'F'],
+        C: ['A', 'G'],
+        D: ['A', 'H'],
+        E: ['B'],
+        F: ['B'],
+        G: ['C'],
+        H: ['D']
+    };
+
+    // 노드 위치
+    const nodePositions = {
+        A: { x: 150, y: 80 },
+        B: { x: 75, y: 160 },
+        C: { x: 150, y: 160 },
+        D: { x: 225, y: 160 },
+        E: { x: 30, y: 240 },
+        F: { x: 120, y: 240 },
+        G: { x: 180, y: 240 },
+        H: { x: 270, y: 240 }
+    };
+
+    // DFS 단계
+    let dfsSteps = [];
+    let dfsCurrentStep = -1;
+
+    // BFS 단계
+    let bfsSteps = [];
+    let bfsCurrentStep = -1;
+
+    // 그래프 초기화 함수
+    function initGraph(containerId, nodePositions, graph) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+
+        // 엣지 그리기
+        for (const node in graph) {
+            const { x: x1, y: y1 } = nodePositions[node];
+
+            for (const neighbor of graph[node]) {
+                // 이미 그린 엣지는 건너뛰기
+                if (node > neighbor) continue;
+
+                const { x: x2, y: y2 } = nodePositions[neighbor];
+
+                const dx = x2 - x1;
+                const dy = y2 - y1;
+                const length = Math.sqrt(dx*dx + dy*dy);
+                const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+                const edge = document.createElement('div');
+                edge.className = 'edge';
+                edge.style.width = `${length}px`;
+                edge.style.left = `${x1}px`;
+                edge.style.top = `${y1}px`;
+                edge.style.transform = `rotate(${angle}deg)`;
+
+                container.appendChild(edge);
+            }
+        }
+
+        // 노드 그리기
+        for (const node in nodePositions) {
+            const { x, y } = nodePositions[node];
+            const nodeElement = document.createElement('div');
+            nodeElement.className = 'node';
+            nodeElement.textContent = node;
+            nodeElement.style.left = `${x - 20}px`;
+            nodeElement.style.top = `${y - 20}px`;
+            nodeElement.id = `${containerId}-node-${node}`;
+            container.appendChild(nodeElement);
+        }
+    }
+
+    // DFS 실행 및 단계 기록
+    function simulateDFS(startNode) {
+        const steps = [];
+        const visited = new Set();
+        const stack = [startNode];
+
+        steps.push({
+            current: null,
+            processing: startNode,
+            stack: [...stack],
+            visited: [...visited],
+            explanation: `시작 노드 ${startNode}을(를) 스택에 넣습니다.`
+        });
+
+        while (stack.length > 0) {
+            const node = stack.pop();
+
+            if (!visited.has(node)) {
+                visited.add(node);
+
+                steps.push({
+                    current: node,
+                    processing: null,
+                    stack: [...stack],
+                    visited: [...visited],
+                    explanation: `현재 노드 ${node}을(를) 방문하고 방문 목록에 추가합니다.`
+                });
+
+                // 인접 노드를 역순으로 스택에 추가 (시각적으로 좌에서 우로 방문하기 위함)
+                const neighbors = [...graph[node]].filter(n => !visited.has(n)).reverse();
+
+                if (neighbors.length > 0) {
+                    neighbors.forEach(neighbor => {
+                        stack.push(neighbor);
+
+                        steps.push({
+                            current: node,
+                            processing: neighbor,
+                            stack: [...stack],
+                            visited: [...visited],
+                            explanation: `미방문 인접 노드 ${neighbor}을(를) 스택에 추가합니다.`
+                        });
+                    });
+                } else {
+                    steps.push({
+                        current: node,
+                        processing: null,
+                        stack: [...stack],
+                        visited: [...visited],
+                        explanation: `노드 ${node}의 모든 인접 노드가 이미 방문되었습니다.`
+                    });
+                }
+            }
+        }
+
+        steps.push({
+            current: null,
+            processing: null,
+            stack: [],
+            visited: [...visited],
+            explanation: "DFS 탐색 완료! 모든 노드를 방문했습니다."
+        });
+
+        return steps;
+    }
+
+    // BFS 실행 및 단계 기록
+    function simulateBFS(startNode) {
+        const steps = [];
+        const visited = new Set();
+        const queue = [startNode];
+
+        visited.add(startNode);
+
+        steps.push({
+            current: null,
+            processing: startNode,
+            queue: [...queue],
+            visited: [...visited],
+            explanation: `시작 노드 ${startNode}을(를) 큐에 넣고 방문 표시합니다.`
+        });
+
+        while (queue.length > 0) {
+            const node = queue.shift();
+
+            steps.push({
+                current: node,
+                processing: null,
+                queue: [...queue],
+                visited: [...visited],
+                explanation: `큐에서 노드 ${node}를 꺼내 현재 노드로 처리합니다.`
+            });
+
+            const neighbors = graph[node].filter(n => !visited.has(n));
+
+            if (neighbors.length > 0) {
+                neighbors.forEach(neighbor => {
+                    visited.add(neighbor);
+                    queue.push(neighbor);
+
+                    steps.push({
+                        current: node,
+                        processing: neighbor,
+                        queue: [...queue],
+                        visited: [...visited],
+                        explanation: `인접 노드 ${neighbor}를 방문 표시하고 큐에 추가합니다.`
+                    });
+                });
+            } else {
+                steps.push({
+                    current: node,
+                    processing: null,
+                    queue: [...queue],
+                    visited: [...visited],
+                    explanation: `노드 ${node}의 모든 인접 노드가 이미 방문되었습니다.`
+                });
+            }
+        }
+
+        steps.push({
+            current: null,
+            processing: null,
+            queue: [],
+            visited: [...visited],
+            explanation: "BFS 탐색 완료! 모든 노드를 방문했습니다."
+        });
+
+        return steps;
+    }
+
+    // DFS 상태 업데이트
+    function updateDFSState(step) {
+        // 모든 노드 초기화
+        document.querySelectorAll('#dfs-graph .node').forEach(node => {
+            node.classList.remove('visited', 'current', 'processing');
+        });
+
+        // 방문한 노드 표시
+        step.visited.forEach(node => {
+            document.getElementById(`dfs-graph-node-${node}`).classList.add('visited');
+        });
+
+        // 현재 노드 표시
+        if (step.current) {
+            document.getElementById(`dfs-graph-node-${step.current}`).classList.add('current');
+        }
+
+        // 처리 중인 노드 표시
+        if (step.processing) {
+            document.getElementById(`dfs-graph-node-${step.processing}`).classList.add('processing');
+        }
+
+        // 스택 업데이트
+        const stackContainer = document.getElementById('dfs-stack');
+        stackContainer.innerHTML = '';
+        if (step.stack.length > 0) {
+            const reversedStack = [...step.stack].reverse(); // 스택의 맨 위가 앞에 오도록 표시
+            reversedStack.forEach(node => {
+                const item = document.createElement('div');
+                item.className = 'data-item';
+                item.textContent = node;
+                stackContainer.appendChild(item);
+            });
+        } else {
+            stackContainer.innerHTML = '<em>비어 있음</em>';
+        }
+
+        // 방문 순서 업데이트
+        const visitedContainer = document.getElementById('dfs-visited');
+        visitedContainer.innerHTML = '';
+        if (step.visited.length > 0) {
+            step.visited.forEach(node => {
+                const item = document.createElement('div');
+                item.className = 'data-item';
+                item.textContent = node;
+                visitedContainer.appendChild(item);
+            });
+        } else {
+            visitedContainer.innerHTML = '<em>비어 있음</em>';
+        }
+
+        // 설명 업데이트
+        document.getElementById('dfs-explanation').textContent = step.explanation;
+
+        // 단계 표시 업데이트
+        document.getElementById('dfs-step').textContent = `단계: ${dfsCurrentStep + 1}/${dfsSteps.length}`;
+
+        // 버튼 상태 업데이트
+        document.getElementById('dfs-prev').disabled = dfsCurrentStep <= 0;
+        document.getElementById('dfs-next').disabled = dfsCurrentStep >= dfsSteps.length - 1;
+    }
+
+    // BFS 상태 업데이트
+    function updateBFSState(step) {
+        // 모든 노드 초기화
+        document.querySelectorAll('#bfs-graph .node').forEach(node => {
+            node.classList.remove('visited', 'current', 'processing');
+        });
+
+        // 방문한 노드 표시
+        step.visited.forEach(node => {
+            document.getElementById(`bfs-graph-node-${node}`).classList.add('visited');
+        });
+
+        // 현재 노드 표시
+        if (step.current) {
+            document.getElementById(`bfs-graph-node-${step.current}`).classList.add('current');
+        }
+
+        // 처리 중인 노드 표시
+        if (step.processing) {
+            document.getElementById(`bfs-graph-node-${step.processing}`).classList.add('processing');
+        }
+
+        // 큐 업데이트
+        const queueContainer = document.getElementById('bfs-queue');
+        queueContainer.innerHTML = '';
+        if (step.queue.length > 0) {
+            step.queue.forEach(node => {
+                const item = document.createElement('div');
+                item.className = 'data-item';
+                item.textContent = node;
+                queueContainer.appendChild(item);
+            });
+        } else {
+            queueContainer.innerHTML = '<em>비어 있음</em>';
+        }
+
+        // 방문 순서 업데이트
+        const visitedContainer = document.getElementById('bfs-visited');
+        visitedContainer.innerHTML = '';
+        if (step.visited.length > 0) {
+            step.visited.forEach(node => {
+                const item = document.createElement('div');
+                item.className = 'data-item';
+                item.textContent = node;
+                visitedContainer.appendChild(item);
+            });
+        } else {
+            visitedContainer.innerHTML = '<em>비어 있음</em>';
+        }
+
+        // 설명 업데이트
+        document.getElementById('bfs-explanation').textContent = step.explanation;
+
+        // 단계 표시 업데이트
+        document.getElementById('bfs-step').textContent = `단계: ${bfsCurrentStep + 1}/${bfsSteps.length}`;
+
+        // 버튼 상태 업데이트
+        document.getElementById('bfs-prev').disabled = bfsCurrentStep <= 0;
+        document.getElementById('bfs-next').disabled = bfsCurrentStep >= bfsSteps.length - 1;
+    }
+
+    // 이벤트 리스너 설정
+    function setupEventListeners() {
+        // DFS 버튼
+        document.getElementById('dfs-next').addEventListener('click', () => {
+            if (dfsCurrentStep < dfsSteps.length - 1) {
+                dfsCurrentStep++;
+                updateDFSState(dfsSteps[dfsCurrentStep]);
+            }
+        });
+
+        document.getElementById('dfs-prev').addEventListener('click', () => {
+            if (dfsCurrentStep > 0) {
+                dfsCurrentStep--;
+                updateDFSState(dfsSteps[dfsCurrentStep]);
+            }
+        });
+
+        document.getElementById('dfs-reset').addEventListener('click', () => {
+            dfsCurrentStep = 0;
+            updateDFSState(dfsSteps[dfsCurrentStep]);
+        });
+
+        // BFS 버튼
+        document.getElementById('bfs-next').addEventListener('click', () => {
+            if (bfsCurrentStep < bfsSteps.length - 1) {
+                bfsCurrentStep++;
+                updateBFSState(bfsSteps[bfsCurrentStep]);
+            }
+        });
+
+        document.getElementById('bfs-prev').addEventListener('click', () => {
+            if (bfsCurrentStep > 0) {
+                bfsCurrentStep--;
+                updateBFSState(bfsSteps[bfsCurrentStep]);
+            }
+        });
+
+        document.getElementById('bfs-reset').addEventListener('click', () => {
+            bfsCurrentStep = 0;
+            updateBFSState(bfsSteps[bfsCurrentStep]);
+        });
+    }
+
+    // 초기화 및 실행
+    function init() {
+        // 그래프 초기화
+        initGraph('dfs-graph', nodePositions, graph);
+        initGraph('bfs-graph', nodePositions, graph);
+
+        // 알고리즘 시뮬레이션
+        dfsSteps = simulateDFS('A');
+        bfsSteps = simulateBFS('A');
+
+        // 첫 단계 표시
+        dfsCurrentStep = 0;
+        bfsCurrentStep = 0;
+        updateDFSState(dfsSteps[dfsCurrentStep]);
+        updateBFSState(bfsSteps[bfsCurrentStep]);
+
+        // 이벤트 리스너 설정
+        setupEventListeners();
+    }
+
+    // 페이지 로드 시 초기화
+    window.addEventListener('load', init);
+</script>
+</body>
+</html>
