@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DFS Maze Animation</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .maze {
+            display: grid;
+            grid-template-columns: repeat(5, 30px);
+            gap: 2px;
+        }
+        .cell {
+            width: 30px;
+            height: 30px;
+            background-color: lightgray;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+        }
+        .visited {
+            background-color: lightblue;
+        }
+        .path {
+            background-color: yellow;
+        }
+        .start {
+            background-color: green;
+        }
+        .end {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+<div id="maze" class="maze"></div>
+<script>
+    const maze = [
+        [1, 1, 1, 1, 0],
+        [0, 0, 1, 0, 1],
+        [1, 1, 1, 1, 0],
+        [1, 0, 0, 1, 1],
+        [1, 1, 1, 0, 1]
+    ];
+    const start = [0, 0];
+    const end = [4, 4];
+    const rows = maze.length;
+    const cols = maze[0].length;
+    const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
+
+    let path = [];
+
+    function createMaze() {
+        const mazeContainer = document.getElementById('maze');
+        mazeContainer.innerHTML = '';
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                if (i === start[0] && j === start[1]) {
+                    cell.classList.add('start');
+                }
+                if (i === end[0] && j === end[1]) {
+                    cell.classList.add('end');
+                }
+                mazeContainer.appendChild(cell);
+            }
+        }
+    }
+
+    function dfs(x, y) {
+        if (x < 0 || y < 0 || x >= rows || y >= cols || maze[x][y] === 0 || visited[x][y]) {
+            return false;
+        }
+
+        visited[x][y] = true;
+        path.push([x, y]);
+        updateMaze();
+
+        if (x === end[0] && y === end[1]) {
+            return true; // 목표 지점에 도달
+        }
+
+        const directions = [
+            [0, 1],  // 오른쪽
+            [1, 0],  // 아래쪽
+            [0, -1], // 왼쪽
+            [-1, 0]  // 위쪽
+        ];
+
+        for (const [dx, dy] of directions) {
+            const newX = x + dx;
+            const newY = y + dy;
+            if (dfs(newX, newY)) {
+                return true;
+            }
+        }
+
+        path.pop(); // 경로가 아닌 곳은 뺀다
+        updateMaze();
+        return false;
+    }
+
+    function updateMaze() {
+        const mazeContainer = document.getElementById('maze');
+        let index = 0;
+        const cells = mazeContainer.getElementsByClassName('cell');
+
+        setTimeout(() => {
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    const cell = cells[index];
+                    if (visited[i][j]) {
+                        cell.classList.add('visited');
+                    }
+                    if (path.some(([px, py]) => px === i && py === j)) {
+                        cell.classList.add('path');
+                    }
+                    index++;
+                }
+            }
+        }, 500); // 500ms마다 갱신
+    }
+
+    createMaze();
+    dfs(start[0], start[1]);
+</script>
+</body>
+</html>
