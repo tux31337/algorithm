@@ -15,16 +15,12 @@ public class Baekjoon2003 {
 
         int result = 0;
 
-        System.out.println("M = " + M);
-
         // 수열을 담을 배열과 수열을 입력
         int[] arr = new int[N];
 
         for (int i = 0; i < N; i++) {
             arr[i] = scanner.nextInt();
         }
-
-        System.out.println(Arrays.toString(arr));
 
         int startIndex = 0;
         int endIndex =  0;
@@ -44,7 +40,7 @@ public class Baekjoon2003 {
             }
         }
 
-        System.out.println("result = " + result);
+        System.out.println(result);
     }
 
     static int calculateSum(int startIndex, int endIndex, int[] arr) {
