@@ -1,4 +1,4 @@
-package pratice;
+package pratice.twopointer;
 
 import java.util.Scanner;
 

@@ -1,6 +1,5 @@
-package pratice;
+package pratice.twopointer;
 
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class Baekjoon2003 {
